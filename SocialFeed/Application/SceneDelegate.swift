@@ -15,5 +15,4 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func assembly() -> UIViewController {
         return FeedViewController()
     }
-
 }

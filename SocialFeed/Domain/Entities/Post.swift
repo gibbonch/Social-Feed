@@ -1,0 +1,60 @@
+/// Модель, описывающая опубликованный пост.
+struct Post {
+    
+    /// Уникальный идентификатор поста.
+    let id: String
+    /// Пользователь, опубликовавший пост.
+    let user: User
+    /// Заголовок поста.
+    let title: String
+    /// Текст поста.
+    let text: String
+    /// Изображение поста.
+    let image: String?
+    /// Текст, описывающий когда был создан пост (пример: `"1 дн. назад"`)
+    let created: String
+    /// Общее количество лайков.
+    let totalLikes: Int
+    /// True, если текущий пользователь поставил лайк.
+    let isLiked: Bool
+}
+
+// MARK: - Mocks
+
+extension Array where Element == Post {
+    static var mock: [Post] {
+        return [
+            Post(
+                id: "post_001",
+                user: User(id: "user_001", username: "Иван Иванов", image: "https://example.com/avatar1.jpg"),
+                title: "Мое утро в горах",
+                text: "Сегодня я проснулся в палатке с видом на рассвет в горах. Это было потрясающе!",
+                image: "https://example.com/post_image1.jpg",
+                created: "2 ч. назад",
+                totalLikes: 120,
+                isLiked: true
+            ),
+            Post(
+                id: "post_002",
+                user: User(id: "user_002", username: "Мария Смирнова", image: "https://example.com/avatar2.jpg"),
+                title: "Лучшие книги этого месяца",
+                text: "Поделилась списком книг, которые стоит прочитать в июле. Очень вдохновляют!",
+                image: nil,
+                created: "1 дн. назад",
+                totalLikes: 87,
+                isLiked: false
+            ),
+            Post(
+                id: "post_003",
+                user: User(id: "user_003", username: "Алексей Петров", image: "https://example.com/avatar3.jpg"),
+                title: "Велопрогулка по набережной",
+                text: "Проехал сегодня 25 км вдоль реки. Погода супер!",
+                image: "https://example.com/post_image3.jpg",
+                created: "3 дн. назад",
+                totalLikes: 42,
+                isLiked: false
+            )
+        ]
+    }
+}
+

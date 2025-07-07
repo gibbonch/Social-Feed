@@ -1,0 +1,58 @@
+@startuml
+
+package Domain {
+    struct Post {
+        + id: String
+        + user: User
+        + title: String
+        + text: String
+        + image: String
+        + created: String
+        + totalLikes: Int
+        + isLiked: Bool
+    }
+
+    struct User {
+        + id: String
+        + username: String
+        + image: String
+    }
+
+    protocol PostsProvider {
+        + fetchPosts(page: Int, perPage: Int, _ completion: @escaping (Result<[Post], Error>) -> Void)
+        + fetchPost(with id: String, _ completion: @escaping (Post?) -> Void)
+    }
+
+    protocol PostsRepository {
+        + store(post: Post, _ onFailure: @escaping (Error) -> Void)
+        + deletePost(with id: String, _ onFailure: @escaping (Error) -> Void)
+    }
+
+    protocol FavouritesRepository {
+        + likePost(with id: String, _ onFailure: @escaping (Error) -> Void)
+        + unlikePost(with id: String, _ onFailure: @escaping (Error) -> Void)
+    }
+
+    PostsRepository ..|> PostsProvider
+}
+
+package Presentation {
+
+}
+
+package Data {
+    class RemotePostsProvider
+    class LocalPostsRepository
+    class NetworkClient
+    class CoreDataStack
+    protocol ContextPorvider
+
+    CoreDataStack ..|> ContextPorvider
+    LocalPostsRepository --> ContextPorvider
+    RemotePostsProvider --> NetworkClient
+}
+
+RemotePostsProvider ..|> PostsProvider
+LocalPostsRepository ..|> PostsRepository
+
+@enduml
