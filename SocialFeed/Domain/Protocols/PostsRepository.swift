@@ -16,4 +16,3 @@ protocol PostsRepository: PostsProviding {
     ///   - onFailure: Замыкание, вызываемое при возникновении ошибки во время удаления. Возвращает объект `Error`.
     func deletePost(by id: String, onFailure: @escaping (Error) -> Void)
 }
-

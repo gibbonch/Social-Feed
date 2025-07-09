@@ -13,6 +13,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func assembly() -> UIViewController {
-        return FeedViewController()
+        let viewModel = FeedViewModelImpl(fetchPostsUseCase: FetchMockPostsUseCase())
+        let viewController = FeedViewController(viewModel: viewModel)
+        let navigationController = UINavigationController(rootViewController: viewController)
+        return navigationController
     }
 }
