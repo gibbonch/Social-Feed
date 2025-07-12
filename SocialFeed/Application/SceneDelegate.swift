@@ -20,10 +20,11 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                                 diskCapacity: 100 * 1024 * 1024)
         config.requestCachePolicy = .useProtocolCachePolicy
         let networkClient = NetworkClient(environment: .mock, configuration: config)
-        
-        let provider = PostsProvider(client: networkClient)
-        
-        let viewModel = FeedViewModelImpl(fetchPostsUseCase: FetchPostsUseCaseImpl(postProvider: provider))
+        let provider = RemotePostsProvider(client: networkClient)
+        let coreDataStack = CoreDataStack()
+        let favoritesManager = FavoriteManager(contextProvider: coreDataStack)
+        let likePostUseCase = LikePostUseCaseImpl(client: networkClient, favoritesManager: favoritesManager)
+        let viewModel = FeedViewModelImpl(fetchPostsUseCase: FetchPostsUseCaseImpl(postProvider: provider, favoriteManager: favoritesManager), likePostUseCase: likePostUseCase)
         let viewController = FeedViewController(viewModel: viewModel)
         let navigationController = UINavigationController(rootViewController: viewController)
         

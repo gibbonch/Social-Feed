@@ -7,6 +7,7 @@ final class FeedViewModelImpl {
     
     private let stateSubject = CurrentValueSubject<FeedViewState, Never>(FeedViewState())
     private let fetchPostsUseCase: FetchPostsUseCase
+    private let likePostUseCase: LikePostUseCase
     
     private var currentState: FeedViewState {
         stateSubject.value
@@ -14,8 +15,9 @@ final class FeedViewModelImpl {
     
     // MARK: - Lifecycle
     
-    init(fetchPostsUseCase: FetchPostsUseCase) {
+    init(fetchPostsUseCase: FetchPostsUseCase, likePostUseCase: LikePostUseCase) {
         self.fetchPostsUseCase = fetchPostsUseCase
+        self.likePostUseCase = likePostUseCase
     }
     
     // MARK: - Private Methods
@@ -46,9 +48,8 @@ final class FeedViewModelImpl {
                     }
                 }
                 
-            case .failure(let error):
+            case .failure(_):
                 self?.updateState { $0.isLoading = false }
-                print(error)
             }
         }
     }
@@ -74,7 +75,25 @@ extension FeedViewModelImpl: FeedViewModel {
         loadPosts()
     }
     
-    func likeTappedOnPost(at indexPath: IndexPath) { }
+    func likeTappedOnPost(at indexPath: IndexPath) {
+        let post = currentState.posts[indexPath.row]
+        likePostUseCase.execute(postId: post.postId, isLiked: !post.isLiked)
+        
+        updateState { state in
+            if let index = state.posts.firstIndex(where: { $0.postId == post.postId }) {
+                var builder = PostCellViewModelBuilder(postCellViewModel: state.posts[index])
+                builder.isLiked = !post.isLiked
+                let currentLikes = state.posts[index].totalLikes
+                if !post.isLiked {
+                    builder.totalLikes = currentLikes + 1
+                } else {
+                    builder.totalLikes = max(0, currentLikes - 1)
+                }
+                
+                state.posts[index] = builder.build()
+            }
+        }
+    }
     
     func storeTappedOnPost(at indexPath: IndexPath) { }
     

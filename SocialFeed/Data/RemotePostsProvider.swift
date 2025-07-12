@@ -1,6 +1,6 @@
 import Foundation
 
-final class PostsProvider: PostsProviding {
+final class RemotePostsProvider: PostsProviding {
     private let client: NetworkClient
     
     init(client: NetworkClient) {

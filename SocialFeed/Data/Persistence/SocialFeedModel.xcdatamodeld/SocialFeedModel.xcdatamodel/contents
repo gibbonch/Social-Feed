@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23788.4" systemVersion="24F74" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
-    <entity name="PendingLikeEntity" representedClassName="PendingLikeEntity" syncable="YES" codeGenerationType="class"/>
+    <entity name="PendingLikeEntity" representedClassName="PendingLikeEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="liked" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="postId" attributeType="String"/>
+        <attribute name="timestamp" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
     <entity name="PostEntity" representedClassName="PostEntity" syncable="YES" codeGenerationType="class"/>
 </model>

@@ -62,6 +62,9 @@ final class FeedViewController: UIViewController {
             postCell.onTextExpansion = {
                 self?.viewModel.postExpanded(at: indexPath)
             }
+            postCell.onLikeTap = {
+                self?.viewModel.likeTappedOnPost(at: indexPath)
+            }
             return postCell
         })
     }
