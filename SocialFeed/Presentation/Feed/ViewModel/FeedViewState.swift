@@ -5,4 +5,5 @@ struct FeedViewState {
     var posts: [PostCellViewModel] = []
     var page = 0
     var perPage = 10
+    var hasMoreData: Bool = true
 }

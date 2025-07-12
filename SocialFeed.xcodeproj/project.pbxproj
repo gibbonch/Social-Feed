@@ -6,8 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		74F4EF64CC9513E989AB53BA /* Pods_SocialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CCF28FB48A687EFC7702E1E8 /* Pods_SocialFeed.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		18FE07BF2E1BAD7E00776F52 /* SocialFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SocialFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C0DE9AA4D4C7C70A14CA3B2 /* Pods-SocialFeed.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SocialFeed.release.xcconfig"; path = "Target Support Files/Pods-SocialFeed/Pods-SocialFeed.release.xcconfig"; sourceTree = "<group>"; };
+		5BA943C76C6F2046C51FCF59 /* Pods-SocialFeed.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SocialFeed.debug.xcconfig"; path = "Target Support Files/Pods-SocialFeed/Pods-SocialFeed.debug.xcconfig"; sourceTree = "<group>"; };
+		CCF28FB48A687EFC7702E1E8 /* Pods_SocialFeed.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SocialFeed.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				74F4EF64CC9513E989AB53BA /* Pods_SocialFeed.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +55,8 @@
 			children = (
 				18FE07C12E1BAD7E00776F52 /* SocialFeed */,
 				18FE07C02E1BAD7E00776F52 /* Products */,
+				71FD78F01188478A29F4CD49 /* Pods */,
+				3F481D40712E2DD07DA5820E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,6 +68,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		3F481D40712E2DD07DA5820E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CCF28FB48A687EFC7702E1E8 /* Pods_SocialFeed.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		71FD78F01188478A29F4CD49 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				5BA943C76C6F2046C51FCF59 /* Pods-SocialFeed.debug.xcconfig */,
+				2C0DE9AA4D4C7C70A14CA3B2 /* Pods-SocialFeed.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -65,9 +92,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 18FE07D22E1BAD7F00776F52 /* Build configuration list for PBXNativeTarget "SocialFeed" */;
 			buildPhases = (
+				0CE6CDC12D5EDDF8C3E96929 /* [CP] Check Pods Manifest.lock */,
 				18FE07BB2E1BAD7E00776F52 /* Sources */,
 				18FE07BC2E1BAD7E00776F52 /* Frameworks */,
 				18FE07BD2E1BAD7E00776F52 /* Resources */,
+				E03CA7F5F0CB9714C14EA3EF /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -77,8 +106,6 @@
 				18FE07C12E1BAD7E00776F52 /* SocialFeed */,
 			);
 			name = SocialFeed;
-			packageProductDependencies = (
-			);
 			productName = SocialFeed;
 			productReference = 18FE07BF2E1BAD7E00776F52 /* SocialFeed.app */;
 			productType = "com.apple.product-type.application";
@@ -127,6 +154,52 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		0CE6CDC12D5EDDF8C3E96929 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SocialFeed-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E03CA7F5F0CB9714C14EA3EF /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SocialFeed/Pods-SocialFeed-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SocialFeed/Pods-SocialFeed-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SocialFeed/Pods-SocialFeed-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		18FE07BB2E1BAD7E00776F52 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -140,6 +213,7 @@
 /* Begin XCBuildConfiguration section */
 		18FE07D32E1BAD7F00776F52 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5BA943C76C6F2046C51FCF59 /* Pods-SocialFeed.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -172,6 +246,7 @@
 		};
 		18FE07D42E1BAD7F00776F52 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2C0DE9AA4D4C7C70A14CA3B2 /* Pods-SocialFeed.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -240,7 +315,7 @@
 				DEVELOPMENT_TEAM = 3UVVPY2T4W;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -304,7 +379,7 @@
 				DEVELOPMENT_TEAM = 3UVVPY2T4W;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

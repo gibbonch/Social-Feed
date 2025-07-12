@@ -1,4 +1,5 @@
 import UIKit
+import AlamofireImage
 
 /// Ячейка поста.
 final class PostCell: UITableViewCell {
@@ -102,6 +103,7 @@ final class PostCell: UITableViewCell {
     private var isLiked = false
     private var isStored = false
     private var totalLikes = 0
+    private var currentImageURL: URL?
     
     // MARK: - Constants
     
@@ -123,12 +125,18 @@ final class PostCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        postImageView.image = nil
+        postImageView.af.cancelImageRequest()
+        currentImageURL = nil
+    }
+    
     // MARK: - Internal Methods
     
     func configure(viewModel: PostCellViewModel) {
-        authorView.setAvatar(image: .avatar)
+        
         authorView.setUsername(viewModel.username)
-        postImageView.image = .museum
         headerLabel.text = viewModel.title
         createdLabel.text = viewModel.created
         originalText = viewModel.text
@@ -138,12 +146,36 @@ final class PostCell: UITableViewCell {
         totalLikes = viewModel.totalLikes
         isStored = viewModel.isStored
         
+        authorView.setAvatar(image: .avatar)
+        
+        if let postImageURL = viewModel.postImageURL {
+            loadImage(from: postImageURL)
+        }
+        
         updateTextDisplay()
         updateLikeButton()
         updateStoreButton()
     }
     
     // MARK: - Private Methods
+    
+    private func loadImage(from url: URL) {
+        guard currentImageURL != url else { return }
+        
+        currentImageURL = url
+        
+        let imageFilter = AspectScaledToFillSizeFilter(
+            size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width * 2/3)
+        )
+        
+        postImageView.af.setImage(
+            withURL: url,
+            placeholderImage: nil,
+            filter: imageFilter,
+            imageTransition: .crossDissolve(0.2),
+            runImageTransitionIfCached: false
+        )
+    }
     
     private func updateTextDisplay() {
         let font = postTextLabel.font ?? .systemFont(ofSize: 12, weight: .regular)

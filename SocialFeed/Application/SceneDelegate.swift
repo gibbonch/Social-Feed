@@ -13,9 +13,20 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func assembly() -> UIViewController {
-        let viewModel = FeedViewModelImpl(fetchPostsUseCase: FetchMockPostsUseCase())
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 10
+        config.timeoutIntervalForResource = 60
+        config.urlCache = URLCache(memoryCapacity: 10 * 1024 * 1024,
+                                diskCapacity: 100 * 1024 * 1024)
+        config.requestCachePolicy = .useProtocolCachePolicy
+        let networkClient = NetworkClient(environment: .mock, configuration: config)
+        
+        let provider = PostsProvider(client: networkClient)
+        
+        let viewModel = FeedViewModelImpl(fetchPostsUseCase: FetchPostsUseCaseImpl(postProvider: provider))
         let viewController = FeedViewController(viewModel: viewModel)
         let navigationController = UINavigationController(rootViewController: viewController)
+        
         return navigationController
     }
 }

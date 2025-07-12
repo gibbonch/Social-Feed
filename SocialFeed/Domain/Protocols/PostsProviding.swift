@@ -18,7 +18,7 @@ protocol PostsProviding {
 }
 
 /// Тип результата для запроса списка постов.
-typealias FetchPostsCompletion = (Result<[Post], any Error>) -> Void
+typealias FetchPostsCompletion = (Result<[PostSchema], any Error>) -> Void
 
 /// Тип результата для запроса одного поста.
-typealias FetchPostCompletion = (Result<Post, any Error>) -> Void
+typealias FetchPostCompletion = (Result<PostSchema, any Error>) -> Void

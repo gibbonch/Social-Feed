@@ -21,6 +21,12 @@ final class FeedViewModelImpl {
     // MARK: - Private Methods
     
     private func loadPosts() {
+        guard !currentState.isLoading && currentState.hasMoreData else {
+            return
+        }
+        
+        updateState { $0.isLoading = true }
+        
         fetchPostsUseCase.execute(page: currentState.page,
                                   perPage: currentState.perPage) { [weak self] result in
             switch result {
@@ -29,13 +35,19 @@ final class FeedViewModelImpl {
                     let builder = PostCellViewModelBuilder(post: post)
                     return builder.build()
                 }
+                
                 self?.updateState {
                     $0.page += 1
                     $0.isLoading = false
                     $0.posts.append(contentsOf: viewModels)
+                    
+                    if posts.count < $0.perPage {
+                        $0.hasMoreData = false
+                    }
                 }
                 
             case .failure(let error):
+                self?.updateState { $0.isLoading = false }
                 print(error)
             }
         }
@@ -48,15 +60,17 @@ final class FeedViewModelImpl {
     }
 }
 
-// MARK: - FeedViewModel
-
+// MARK: - FeedViewModel (обновленный протокол)
 extension FeedViewModelImpl: FeedViewModel {
     var state: AnyPublisher<FeedViewState, Never> {
         stateSubject.eraseToAnyPublisher()
     }
     
     func viewLoaded() {
-        updateState { $0.isLoading = true }
+        loadPosts()
+    }
+    
+    func loadNextPageIfNeeded() {
         loadPosts()
     }
     

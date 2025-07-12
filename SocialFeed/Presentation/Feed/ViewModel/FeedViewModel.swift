@@ -7,4 +7,5 @@ protocol FeedViewModel {
     func likeTappedOnPost(at indexPath: IndexPath)
     func storeTappedOnPost(at indexPath: IndexPath)
     func postExpanded(at indexPath: IndexPath)
+    func loadNextPageIfNeeded()
 }

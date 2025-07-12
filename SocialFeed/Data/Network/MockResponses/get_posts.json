@@ -1,0 +1,153 @@
+[
+  {
+    "id": "1",
+    "user": {
+      "id": "u1",
+      "username": "alice123",
+      "avatar": "https://example.com/avatars/alice.jpg"
+    },
+    "post_title": "Golden Hour",
+    "post_text": "Admiring the sunset over the mountain lake. Admiring the sunset over the mountain lake. Admiring the sunset over the mountain lake. Admiring the sunset over the mountain lake. Admiring the sunset over the mountain lake. Admiring the sunset over the mountain lake.\nAdmiring the sunset over the mountain lake. Admiring the sunset over the mountain lake. Admiring the sunset over the mountain lake.",
+    "image": "https://images.pexels.com/photos/268533/pexels-photo-268533.jpeg",
+    "created_at": "2025-07-01T10:00:00Z",
+    "total_likes": 10,
+    "liked": true,
+    "like_timestamp": "2025-07-02T12:00:00Z"
+  },
+  {
+    "id": "2",
+    "user": {
+      "id": "u2",
+      "username": "bob_dev",
+      "avatar": null
+    },
+    "post_title": "Foggy Peaks",
+    "post_text": "Early morning hike to fog-covered summits.",
+    "image": "https://images.pexels.com/photos/220045/pexels-photo-220045.jpeg",
+    "created_at": "2025-07-02T11:30:00Z",
+    "total_likes": 5,
+    "liked": false,
+    "like_timestamp": null
+  },
+  {
+    "id": "3",
+    "user": {
+      "id": "u3",
+      "username": "charlie.travel",
+      "avatar": "https://example.com/avatars/charlie.jpg"
+    },
+    "post_title": "Morning Calm",
+    "post_text": "The lake was mirror-flat this morning.",
+    "image": "https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg",
+    "created_at": "2025-06-25T08:20:00Z",
+    "total_likes": 23,
+    "liked": true,
+    "like_timestamp": "2025-06-26T09:00:00Z"
+  },
+  {
+    "id": "4",
+    "user": {
+      "id": "u4",
+      "username": "dana_cooks",
+      "avatar": null
+    },
+    "post_title": "Verdant Valley",
+    "post_text": "Endless green fields as far as the eye can see.",
+    "image": "https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg",
+    "created_at": "2025-06-20T13:45:00Z",
+    "total_likes": 17,
+    "liked": false,
+    "like_timestamp": null
+  },
+  {
+    "id": "5",
+    "user": {
+      "id": "u5",
+      "username": "eve.photography",
+      "avatar": "https://example.com/avatars/eve.jpg"
+    },
+    "post_title": "Winter Wonderland",
+    "post_text": "Snow-covered peaks create a magical scene.",
+    "image": "https://images.pexels.com/photos/547114/pexels-photo-547114.jpeg",
+    "created_at": "2025-07-05T19:00:00Z",
+    "total_likes": 34,
+    "liked": true,
+    "like_timestamp": "2025-07-06T07:00:00Z"
+  },
+  {
+    "id": "6",
+    "user": {
+      "id": "u6",
+      "username": "frank_the_dev",
+      "avatar": "https://example.com/avatars/frank.jpg"
+    },
+    "post_title": "Golden Leaves",
+    "post_text": "Walking among autumn colours.",
+    "image": "https://images.pexels.com/photos/33109/fall-autumn-red-season.jpg",
+    "created_at": "2025-07-03T14:30:00Z",
+    "total_likes": 12,
+    "liked": false,
+    "like_timestamp": null
+  },
+  {
+    "id": "7",
+    "user": {
+      "id": "u7",
+      "username": "grace.design",
+      "avatar": "https://example.com/avatars/grace.jpg"
+    },
+    "post_title": "Lonely Highway",
+    "post_text": "A quiet road through the mountains.",
+    "image": "https://images.pexels.com/photos/40751/pexels-photo-40751.jpeg",
+    "created_at": "2025-07-04T09:10:00Z",
+    "total_likes": 8,
+    "liked": true,
+    "like_timestamp": "2025-07-04T10:00:00Z"
+  },
+  {
+    "id": "8",
+    "user": {
+      "id": "u8",
+      "username": "hank_thoughts",
+      "avatar": null
+    },
+    "post_title": "Cliffside View",
+    "post_text": "Looking over the edge at the ocean below.",
+    "image": "https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg",
+    "created_at": "2025-07-06T16:00:00Z",
+    "total_likes": 3,
+    "liked": false,
+    "like_timestamp": null
+  },
+  {
+    "id": "9",
+    "user": {
+      "id": "u9",
+      "username": "ivy_fitness",
+      "avatar": "https://example.com/avatars/ivy.jpg"
+    },
+    "post_title": "Sahara Heat",
+    "post_text": "Endless dunes under a scorching sun.",
+    "image": "https://images.pexels.com/photos/248771/pexels-photo-248771.jpeg",
+    "created_at": "2025-07-07T07:30:00Z",
+    "total_likes": 20,
+    "liked": true,
+    "like_timestamp": "2025-07-07T08:00:00Z"
+  },
+  {
+    "id": "10",
+    "user": {
+      "id": "u10",
+      "username": "jack_music",
+      "avatar": "https://example.com/avatars/jack.jpg"
+    },
+    "post_title": "Hidden Stream",
+    "post_text": "A serene stream hidden in lush forest.",
+    "image": "https://images.pexels.com/photos/4827/nature-forest-water-wilderness.jpg",
+    "created_at": "2025-07-08T18:20:00Z",
+    "total_likes": 15,
+    "liked": true,
+    "like_timestamp": "2025-07-09T10:00:00Z"
+  }
+]
+

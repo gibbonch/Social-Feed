@@ -1,6 +1,6 @@
 /// Протокол, объединяющий функциональность получения, хранения и удаления объектов `Post`
 /// из локального или удалённого хранилища.
-protocol PostsRepository: PostsProviding {
+protocol PostsRepositoryProtocol: PostsProviding {
 
     /// Сохраняет пост в хранилище.
     ///
