@@ -135,7 +135,6 @@ final class PostCell: UITableViewCell {
     // MARK: - Internal Methods
     
     func configure(viewModel: PostCellViewModel) {
-        
         authorView.setUsername(viewModel.username)
         headerLabel.text = viewModel.title
         createdLabel.text = viewModel.created.formatDate
@@ -146,10 +145,17 @@ final class PostCell: UITableViewCell {
         totalLikes = viewModel.totalLikes
         isStored = viewModel.isStored
         
-        authorView.setAvatar(image: .avatar)
+        if let avatarURL = viewModel.avatarURL {
+            authorView.setAvatar(url: avatarURL)
+        } else {
+            authorView.setAvatar(image: .avatar)
+        }
         
         if let postImageURL = viewModel.postImageURL {
-            loadImage(from: postImageURL)
+            loadPostImage(from: postImageURL)
+        } else {
+            postImageView.image = nil
+            currentImageURL = nil
         }
         
         updateTextDisplay()
@@ -159,22 +165,28 @@ final class PostCell: UITableViewCell {
     
     // MARK: - Private Methods
     
-    private func loadImage(from url: URL) {
+    private func loadPostImage(from url: URL) {
         guard currentImageURL != url else { return }
+        
+        postImageView.af.cancelImageRequest()
         
         currentImageURL = url
         
-        let imageFilter = AspectScaledToFillSizeFilter(
-            size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width * 2/3)
+        let targetSize = CGSize(
+            width: UIScreen.main.bounds.width,
+            height: UIScreen.main.bounds.width * 2/3
         )
+        
+        let imageFilter = AspectScaledToFillSizeFilter(size: targetSize)
         
         postImageView.af.setImage(
             withURL: url,
             placeholderImage: nil,
             filter: imageFilter,
+            progress: nil,
+            progressQueue: .main,
             imageTransition: .crossDissolve(0.2),
-            runImageTransitionIfCached: false
-        )
+            runImageTransitionIfCached: false)
     }
     
     private func updateTextDisplay() {
