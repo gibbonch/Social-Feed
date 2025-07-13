@@ -19,7 +19,7 @@
 
 | Рекомендации | Сохраненные | 
 |---------------|----------------|
-| ![screenshot1]() | ![screenshot2]() |
+| ![screenshot1](https://github.com/gibbonch/Social-Feed/blob/4288788433ac80c9368960c645d0333c563fa56e/Screenshots/recs.png) | ![screenshot2](https://github.com/gibbonch/Social-Feed/blob/4288788433ac80c9368960c645d0333c563fa56e/Screenshots/stored.png) |
 
 > Скриншоты находятся в папке `Screenshots/`.
 
