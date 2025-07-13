@@ -16,7 +16,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// Composition Root
     private func assembly() -> UIViewController {
         let feedVM = FeedViewModelImpl(
-            fetchPostsUseCase: DependencyContainer.shared.fetchPostsUseCase,
+            fetchPostsFromServerUseCase: DependencyContainer.shared.fetchPostsFromServerUseCase,
+            fetchPostsFromCoreDataUseCase: DependencyContainer.shared.fetchPostsFromCoreDataUseCase,
             likePostUseCase: DependencyContainer.shared.likePostUseCase,
             storePostUseCase: DependencyContainer.shared.storePostUseCase
         )

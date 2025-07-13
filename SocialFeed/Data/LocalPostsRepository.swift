@@ -17,30 +17,22 @@ final class LocalPostsRepository: PostsRepository {
     // MARK: - Internal Methods
     
     func store(post: Post, completion: @escaping (Result<Void, any Error>) -> Void) {
-        contextProvider.performOnBackground { [weak self] context in
-            guard let self = self else { return }
-            
-            do {
-                try self.savePost(post, in: context)
-                completion(.success(()))
-            } catch {
-                context.rollback()
-                completion(.failure(error))
-            }
+        do {
+            try self.savePost(post, in: contextProvider.viewContext)
+            completion(.success(()))
+        } catch {
+            contextProvider.viewContext.rollback()
+            completion(.failure(error))
         }
     }
     
     func deletePost(by id: String, completion: @escaping (Result<Void, any Error>) -> Void) {
-        contextProvider.performOnBackground { [weak self] context in
-            guard let self = self else { return }
-            
-            do {
-                try self.deletePostEntity(with: id, in: context)
-                completion(.success(()))
-            } catch {
-                context.rollback()
-                completion(.failure(error))
-            }
+        do {
+            try self.deletePostEntity(with: id, in: contextProvider.viewContext)
+            completion(.success(()))
+        } catch {
+            contextProvider.viewContext.rollback()
+            completion(.failure(error))
         }
     }
     

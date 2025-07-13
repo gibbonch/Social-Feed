@@ -1,7 +1,7 @@
 import Foundation
 
 protocol StorePostUseCase {
-    func execute(post: Post, onFailure: @escaping (any Error) -> Void)
+    func execute(post: Post, completion: @escaping (Result<Void, any Error>) -> Void)
 }
 
 final class StorePostUseCaseImpl: StorePostUseCase {
@@ -11,17 +11,23 @@ final class StorePostUseCaseImpl: StorePostUseCase {
         self.localRepository = localRepository
     }
     
-    func execute(post: Post, onFailure: @escaping (any Error) -> Void) {
+    func execute(post: Post, completion: @escaping (Result<Void, any Error>) -> Void) {
         if post.isStored {
             localRepository.deletePost(by: post.id) { result in
-                if case .failure(let error) = result {
-                    onFailure(error)
+                switch result {
+                case .success():
+                    completion(.success(()))
+                case .failure(let error):
+                    completion(.failure(error))
                 }
             }
         } else {
             localRepository.store(post: post) { result in
-                if case .failure(let error) = result {
-                    onFailure(error)
+                switch result {
+                case .success():
+                    completion(.success(()))
+                case .failure(let error):
+                    completion(.failure(error))
                 }
             }
         }

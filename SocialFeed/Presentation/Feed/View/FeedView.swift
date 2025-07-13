@@ -4,9 +4,15 @@ final class FeedView: UIView {
     
     // MARK: - Subviews
     
+    private(set) lazy var activityIndicator: UIActivityIndicatorView = {
+        let activityIndicator = UIActivityIndicatorView(style: .medium)
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        return activityIndicator
+    }()
+    
     private(set) lazy var segmentedControl: UISegmentedControl = {
-        let segmentedControl = UISegmentedControl(items: ["Рекомендации", "Сохраненные"])
-        segmentedControl.selectedSegmentIndex = 0
+        let segmentedControl = UISegmentedControl(items: FeedSegment.allCases.map(\.rawValue))
+        segmentedControl.selectedSegmentIndex = FeedSegment.remote.index
         segmentedControl.translatesAutoresizingMaskIntoConstraints = false
         return segmentedControl
     }()
@@ -16,9 +22,12 @@ final class FeedView: UIView {
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
         tableView.allowsSelection = false
+        tableView.refreshControl = refreshControl
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
+    
+    private(set) lazy var refreshControl = UIRefreshControl()
     
     // MARK: - Private Properties
     
@@ -26,7 +35,6 @@ final class FeedView: UIView {
     private var lastContentOffset: CGFloat = 0
     private let segmentedControlHeight: CGFloat = 28
     private let animationDuration: TimeInterval = 0.3
-    private var isControlHidden = false
     
     // MARK: - Lifecycle
     
@@ -46,6 +54,7 @@ final class FeedView: UIView {
     private func setupView() {
         addSubview(segmentedControl)
         addSubview(tableView)
+        addSubview(activityIndicator)
         backgroundColor = .white
     }
     
@@ -61,7 +70,10 @@ final class FeedView: UIView {
             tableView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 8),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
     }
     
@@ -74,15 +86,14 @@ final class FeedView: UIView {
             currentOffset = 0
         }
         
-        if currentOffset > scrollView.frame.height {
-            currentOffset = scrollView.frame.height
+        let maxOffset = max(0, scrollView.contentSize.height - scrollView.frame.height)
+        if currentOffset > maxOffset {
+            return
         }
         
         let offsetDifference = currentOffset - lastContentOffset
         
-        print(currentOffset, lastContentOffset)
-        
-        let threshold: CGFloat = 10
+        let threshold: CGFloat = 30
         
         if abs(offsetDifference) > threshold {
             lastContentOffset = currentOffset

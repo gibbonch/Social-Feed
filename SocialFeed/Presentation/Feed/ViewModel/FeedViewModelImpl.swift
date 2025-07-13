@@ -5,144 +5,304 @@ final class FeedViewModelImpl {
     
     // MARK: - Private Properties
     
+    private var localState = FeedViewState()
+    private var remoteState = FeedViewState()
+    private var selectedSegment: FeedSegment = .remote
+    
     private let stateSubject = CurrentValueSubject<FeedViewState, Never>(FeedViewState())
-    private let fetchPostsUseCase: FetchPostsUseCase
+    
+    private let fetchPostsFromServerUseCase: FetchPostsUseCase
+    private let fetchPostsFromCoreDataUseCase: FetchPostsUseCase
     private let likePostUseCase: LikePostUseCase
     private let storePostUseCase: StorePostUseCase
     
-    private var currentState: FeedViewState {
-        stateSubject.value
-    }
-    
     // MARK: - Lifecycle
     
-    init(fetchPostsUseCase: FetchPostsUseCase,
+    init(fetchPostsFromServerUseCase: FetchPostsUseCase,
+         fetchPostsFromCoreDataUseCase: FetchPostsUseCase,
          likePostUseCase: LikePostUseCase,
-         storePostUseCase: StorePostUseCase
-    ) {
-        self.fetchPostsUseCase = fetchPostsUseCase
+         storePostUseCase: StorePostUseCase) {
+        
+        self.fetchPostsFromServerUseCase = fetchPostsFromServerUseCase
+        self.fetchPostsFromCoreDataUseCase = fetchPostsFromCoreDataUseCase
         self.likePostUseCase = likePostUseCase
         self.storePostUseCase = storePostUseCase
     }
     
     // MARK: - Private Methods
     
-    private func loadPosts() {
-        guard !currentState.isLoading && currentState.hasMoreData else {
-            return
-        }
+    private func loadRemotePosts() {
+        guard remoteState.needsLoad else { return }
+        remoteState.needsLoad = false
         
-        updateState { $0.isLoading = true }
-        
-        fetchPostsUseCase.execute(page: currentState.page,
-                                  perPage: currentState.perPage) { [weak self] result in
-            switch result {
-            case .success(let posts):
-                let viewModels = posts.map { post in
-                    let builder = PostCellViewModelBuilder(post: post)
-                    return builder.build()
-                }
-                
-                self?.updateState {
-                    $0.page += 1
-                    $0.isLoading = false
-                    $0.posts.append(contentsOf: viewModels)
-                    
-                    if posts.count < $0.perPage {
-                        $0.hasMoreData = false
+        fetchPostsFromServerUseCase.execute(page: remoteState.page, perPage: remoteState.perPage) { result in
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                switch result {
+                case .success(let posts):
+                    let viewModels = posts.map {
+                        let builder = PostCellViewModelBuilder(post: $0)
+                        return builder.build()
                     }
+                    
+                    remoteState.needsLoad = posts.count == remoteState.perPage
+                    remoteState.posts.append(contentsOf: viewModels)
+                    remoteState.isLoading = false
+                    remoteState.isRefreshing = false
+                    remoteState.page += 1
+                    
+                case .failure:
+                    break
                 }
                 
-            case .failure(_):
-                self?.updateState { $0.isLoading = false }
+                if selectedSegment == .remote {
+                    stateSubject.send(remoteState)
+                }
             }
         }
     }
     
-    private func updateState(_ mutation: (inout FeedViewState) -> Void) {
-        var newState = stateSubject.value
-        mutation(&newState)
-        stateSubject.send(newState)
+    private func loadLocalPosts() {
+        guard localState.needsLoad else { return }
+        localState.needsLoad = false
+        
+        fetchPostsFromCoreDataUseCase.execute(page: localState.page, perPage: localState.perPage) { result in
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                switch result {
+                case .success(let posts):
+                    let viewModels = posts.map {
+                        let builder = PostCellViewModelBuilder(post: $0)
+                        return builder.build()
+                    }
+                    
+                    localState.needsLoad = posts.count == localState.perPage
+                    localState.posts.append(contentsOf: viewModels)
+                    localState.isLoading = false
+                    localState.isRefreshing = false
+                    localState.page += 1
+                    
+                case .failure:
+                    break
+                }
+                
+                if selectedSegment == .local {
+                    stateSubject.send(localState)
+                }
+            }
+        }
+    }
+    
+    private var currentState: FeedViewState {
+        get {
+            switch selectedSegment {
+            case .remote:
+                return remoteState
+            case .local:
+                return localState
+            }
+        }
+        set {
+            switch selectedSegment {
+            case .remote:
+                remoteState = newValue
+            case .local:
+                localState = newValue
+            }
+        }
     }
 }
 
-// MARK: - FeedViewModel (обновленный протокол)
+// MARK: - FeedViewModel
+
 extension FeedViewModelImpl: FeedViewModel {
+    
     var state: AnyPublisher<FeedViewState, Never> {
         stateSubject.eraseToAnyPublisher()
     }
     
     func viewLoaded() {
-        loadPosts()
+        loadRemotePosts()
+        loadLocalPosts()
     }
     
-    func loadNextPageIfNeeded() {
-        if AppConfiguration.environment != .mock {
-            loadPosts()
+    func loadNextPage() {
+        switch selectedSegment {
+        case .remote:
+            if AppConfiguration.environment != .mock {
+                loadRemotePosts()
+            }
+        case .local:
+            loadLocalPosts()
         }
     }
     
-    func likeTappedOnPost(at indexPath: IndexPath) {
-        let post = currentState.posts[indexPath.row]
-        likePostUseCase.execute(postId: post.id, isLiked: !post.isLiked)
+    func segmentChanged(to segment: FeedSegment) {
+        selectedSegment = segment
+        stateSubject.send(currentState)
+    }
+    
+    func likeTappedOnPost(with id: String) {
+        guard let currentIndex = currentState.posts.firstIndex(where: { $0.id == id }) else {
+            return
+        }
         
-        updateState { state in
-            if let index = state.posts.firstIndex(where: { $0.id == post.id }) {
-                var builder = PostCellViewModelBuilder(postCellViewModel: state.posts[index])
-                builder.isLiked = !post.isLiked
-                let currentLikes = state.posts[index].totalLikes
-                if !post.isLiked {
-                    builder.totalLikes = currentLikes + 1
-                } else {
-                    builder.totalLikes = max(0, currentLikes - 1)
-                }
-                
-                state.posts[index] = builder.build()
+        let post = currentState.posts[currentIndex]
+        let newLikedState = !post.isLiked
+        
+        var builder = PostCellViewModelBuilder(postCellViewModel: post)
+        builder.isLiked = newLikedState
+        builder.totalLikes = newLikedState ? post.totalLikes + 1 : max(0, post.totalLikes - 1)
+        let updatedCellModel = builder.build()
+        
+        currentState.posts[currentIndex] = updatedCellModel
+        
+        switch selectedSegment {
+        case .remote:
+            if let localIndex = localState.posts.firstIndex(where: { $0.id == id }) {
+                var localBuilder = PostCellViewModelBuilder(postCellViewModel: localState.posts[localIndex])
+                localBuilder.isLiked = newLikedState
+                localBuilder.totalLikes = newLikedState ? localState.posts[localIndex].totalLikes + 1 : max(0, localState.posts[localIndex].totalLikes - 1)
+                localState.posts[localIndex] = localBuilder.build()
+            }
+        case .local:
+            if let remoteIndex = remoteState.posts.firstIndex(where: { $0.id == id }) {
+                var remoteBuilder = PostCellViewModelBuilder(postCellViewModel: remoteState.posts[remoteIndex])
+                remoteBuilder.isLiked = newLikedState
+                remoteBuilder.totalLikes = newLikedState ? remoteState.posts[remoteIndex].totalLikes + 1 : max(0, remoteState.posts[remoteIndex].totalLikes - 1)
+                remoteState.posts[remoteIndex] = remoteBuilder.build()
             }
         }
+        
+        likePostUseCase.execute(postId: post.id, isLiked: newLikedState)
+        
+        if updatedCellModel.isStored {
+            let targetPost = Post(
+                id: updatedCellModel.id,
+                username: updatedCellModel.username,
+                avatar: updatedCellModel.avatarURL?.absoluteString ?? "",
+                title: updatedCellModel.title,
+                text: updatedCellModel.text,
+                image: updatedCellModel.postImageURL?.absoluteString ?? "",
+                created: updatedCellModel.created,
+                totalLikes: updatedCellModel.totalLikes,
+                isLiked: updatedCellModel.isLiked,
+                isStored: updatedCellModel.isStored
+            )
+            
+            storePostUseCase.execute(post: targetPost) { [weak self] result in
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    
+                    switch result {
+                    case .success(_):
+                        break
+                    case .failure(_):
+                        print("Failed to update stored post with id: \(id)")
+                        var revertBuilder = PostCellViewModelBuilder(postCellViewModel: updatedCellModel)
+                        revertBuilder.isLiked = post.isLiked
+                        revertBuilder.totalLikes = post.totalLikes
+                        let revertedCellModel = revertBuilder.build()
+                        
+                        self.currentState.posts[currentIndex] = revertedCellModel
+                        
+                        switch self.selectedSegment {
+                        case .remote:
+                            if let localIndex = self.localState.posts.firstIndex(where: { $0.id == id }) {
+                                self.localState.posts[localIndex] = revertedCellModel
+                            }
+                        case .local:
+                            if let remoteIndex = self.remoteState.posts.firstIndex(where: { $0.id == id }) {
+                                self.remoteState.posts[remoteIndex] = revertedCellModel
+                            }
+                        }
+                        
+                        self.stateSubject.send(self.currentState)
+                    }
+                }
+            }
+        }
+        
+        stateSubject.send(currentState)
     }
     
-    func storeTappedOnPost(at indexPath: IndexPath) {
-        let postViewModel = currentState.posts[indexPath.row]
-        let post = Post(
-            id: postViewModel.id,
-            username: postViewModel.username,
-            avatar: postViewModel.avatarURL?.absoluteString ?? "",
-            title: postViewModel.title,
-            text: postViewModel.text,
-            image: postViewModel.postImageURL?.absoluteString ?? "",
-            created: postViewModel.created,
-            totalLikes: postViewModel.totalLikes,
-            isLiked: postViewModel.isLiked,
-            isStored: postViewModel.isStored
+    func storeTappedOnPost(with id: String) {
+        guard let index = currentState.posts.firstIndex(where: { $0.id == id }) else {
+            return
+        }
+        
+        let cellModel = currentState.posts[index]
+        
+        let targetPost = Post(
+            id: cellModel.id,
+            username: cellModel.username,
+            avatar: cellModel.avatarURL?.absoluteString ?? "",
+            title: cellModel.title,
+            text: cellModel.text,
+            image: cellModel.postImageURL?.absoluteString ?? "",
+            created: cellModel.created,
+            totalLikes: cellModel.totalLikes,
+            isLiked: cellModel.isLiked,
+            isStored: cellModel.isStored
         )
         
-        storePostUseCase.execute(post: post) { error in
+        var builder = PostCellViewModelBuilder(postCellViewModel: cellModel)
+        builder.isStored.toggle()
+        let updatedCellModel = builder.build()
+        currentState.posts[index] = updatedCellModel
+        
+        storePostUseCase.execute(post: targetPost) { [weak self] result in
             DispatchQueue.main.async {
-                print("Error storing: \(error)")
+                guard let self else { return }
+                
+                switch result {
+                case .success(_):
+                    if self.selectedSegment == .remote {
+                        self.localState.posts.removeAll()
+                        self.localState.needsLoad = true
+                        self.localState.page = 0
+                        self.loadLocalPosts()
+                    } else {
+                        self.localState.posts = self.localState.posts.filter { $0.id != updatedCellModel.id }
+                        
+                        if let index = self.remoteState.posts.firstIndex(where: { $0.id == updatedCellModel.id }) {
+                            self.remoteState.posts[index] = updatedCellModel
+                        }
+                        self.stateSubject.send(self.currentState)
+                    }
+                case .failure(_):
+                    print("failed to store post with id: \(id)")
+                    var builder = PostCellViewModelBuilder(postCellViewModel: updatedCellModel)
+                    builder.isStored.toggle()
+                    self.currentState.posts[index] = builder.build()
+                    self.stateSubject.send(self.currentState)
+                }
             }
         }
         
-        updateState { state in
-            if let index = state.posts.firstIndex(where: { $0.id == post.id }) {
-                var builder = PostCellViewModelBuilder(postCellViewModel: state.posts[index])
-                builder.isStored = !post.isStored
-                state.posts[index] = builder.build()
-            }
-        }
+        stateSubject.send(currentState)
     }
     
     func postExpanded(at indexPath: IndexPath) {
-        guard indexPath.row < currentState.posts.count else { return }
-        
         let targetPost = currentState.posts[indexPath.row]
+        if let index = currentState.posts.firstIndex(where: { $0.id == targetPost.id }) {
+            var builder = PostCellViewModelBuilder(postCellViewModel: currentState.posts[index])
+            builder.isExpanded.toggle()
+            currentState.posts[index] = builder.build()
+            stateSubject.send(currentState)
+        }
+    }
+    
+    func refresh() {
+        currentState.isRefreshing = true
+        currentState.posts.removeAll()
+        currentState.page = 0
+        currentState.needsLoad = true
         
-        updateState { state in
-            if let index = state.posts.firstIndex(where: { $0.id == targetPost.id }) {
-                var builder = PostCellViewModelBuilder(postCellViewModel: state.posts[index])
-                builder.isExpanded.toggle()
-                state.posts[index] = builder.build()
-            }
+        if selectedSegment == .local {
+            loadLocalPosts()
+        } else {
+            loadRemotePosts()
         }
     }
 }

@@ -37,6 +37,7 @@ final class FeedViewController: UIViewController {
         super.viewDidLoad()
         title = "Social Feed"
         setupTableView()
+        setupSegmentedControl()
         setupDataSource()
         setupBindings()
         viewModel.viewLoaded()
@@ -50,6 +51,7 @@ final class FeedViewController: UIViewController {
             forCellReuseIdentifier: PostCell.reuseIdentifier
         )
         feedView.tableView.delegate = self
+        feedView.refreshControl.addTarget(self, action: #selector(refreshFeed), for: .valueChanged)
     }
     
     private func setupDataSource() {
@@ -63,10 +65,10 @@ final class FeedViewController: UIViewController {
                 self?.viewModel.postExpanded(at: indexPath)
             }
             postCell.onLikeTap = {
-                self?.viewModel.likeTappedOnPost(at: indexPath)
+                self?.viewModel.likeTappedOnPost(with: model.id)
             }
             postCell.onStoreTap = {
-                self?.viewModel.storeTappedOnPost(at: indexPath)
+                self?.viewModel.storeTappedOnPost(with: model.id)
             }
             return postCell
         })
@@ -81,7 +83,29 @@ final class FeedViewController: UIViewController {
             .store(in: &cancellables)
     }
     
+    private func setupSegmentedControl() {
+        feedView.segmentedControl.addTarget(
+            self,
+            action: #selector(segmentedControlValueChanged),
+            for: .valueChanged
+        )
+    }
+    
     private func updateUI(with state: FeedViewState) {
+        if state.isLoading {
+            feedView.activityIndicator.startAnimating()
+            feedView.activityIndicator.isHidden = false
+            feedView.tableView.isHidden = true
+        } else {
+            feedView.activityIndicator.stopAnimating()
+            feedView.activityIndicator.isHidden = true
+            feedView.tableView.isHidden = false
+        }
+        
+        if !state.isRefreshing {
+            feedView.refreshControl.endRefreshing()
+        }
+        
         applySnapshot(viewModels: state.posts)
     }
     
@@ -90,6 +114,20 @@ final class FeedViewController: UIViewController {
         snapshot.appendSections([.main])
         snapshot.appendItems(viewModels)
         dataSource?.apply(snapshot, animatingDifferences: false)
+    }
+    
+    @objc private func segmentedControlValueChanged() {
+        let selectedIndex = feedView.segmentedControl.selectedSegmentIndex
+        let segments = FeedSegment.allCases
+        
+        guard selectedIndex < segments.count else { return }
+        
+        let selectedSegment = segments[selectedIndex]
+        viewModel.segmentChanged(to: selectedSegment)
+    }
+    
+    @objc private func refreshFeed() {
+        viewModel.refresh()
     }
 }
 
@@ -115,7 +153,7 @@ extension FeedViewController: UITableViewDelegate {
         let height = scrollView.frame.size.height
         
         if offsetY > contentHeight - height * 1.2 {
-            viewModel.loadNextPageIfNeeded()
+            viewModel.loadNextPage()
         }
     }
 }

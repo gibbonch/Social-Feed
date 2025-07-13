@@ -1,9 +1,8 @@
-/// Структура, описывающая текущее состояние экрана `Ленты постов`.
 struct FeedViewState {
-    var isLoading = false
-    var isRefreshing = false
+    var isLoading: Bool = true
+    var isRefreshing: Bool = false
     var posts: [PostCellViewModel] = []
-    var page = 0
-    var perPage = 10
-    var hasMoreData: Bool = true
+    var page: Int = 0
+    var perPage: Int = 10
+    var needsLoad: Bool = true
 }

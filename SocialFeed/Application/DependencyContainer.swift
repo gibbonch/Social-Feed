@@ -43,9 +43,15 @@ final class DependencyContainer {
     
     // MARK: - Use Cases
     
-    var fetchPostsUseCase: FetchPostsUseCase {
+    var fetchPostsFromServerUseCase: FetchPostsUseCase {
         FetchPostsUseCaseImpl(
             postProvider: remotePostsProvider,
+        )
+    }
+    
+    var fetchPostsFromCoreDataUseCase: FetchPostsUseCase {
+        FetchPostsUseCaseImpl(
+            postProvider: localPostsRepository,
         )
     }
     
