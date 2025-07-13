@@ -1,8 +1,13 @@
 import CoreData
 
-final class FavoriteManager: FavoriteManaging {
+/// Управляет отложенными действиями лайков/анлайков с использованием Core Data
+final class PendingLikeActionsManager: PendingLikeActionsManaging {
+    
+    // MARK: - Private Properties
     
     private let contextProvider: ContextProvider
+    
+    // MARK: - Initialization
     
     init(contextProvider: ContextProvider) {
         self.contextProvider = contextProvider
@@ -10,54 +15,56 @@ final class FavoriteManager: FavoriteManaging {
     
     // MARK: - Internal Methods
     
-    func addPendingLike(_ postId: String) {
+    func queueLikeAction(for postId: String) {
         contextProvider.performOnBackground { [weak self] context in
-            self?.processPendingAction(postId: postId, liked: true, context: context)
+            self?.processLikeAction(postId: postId, isLiked: true, context: context)
         }
     }
     
-    func addPendingUnlike(_ postId: String) {
+    func queueUnlikeAction(for postId: String) {
         contextProvider.performOnBackground { [weak self] context in
-            self?.processPendingAction(postId: postId, liked: false, context: context)
+            self?.processLikeAction(postId: postId, isLiked: false, context: context)
         }
     }
     
-    func pendingActions(for postId: String) -> [FavoriteAction] {
-        let request = PendingLikeEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "postId == %@", postId)
+    func pendingActions(for postId: String) -> [PendingLikeAction] {
+        let request = PendingLikeEntity.fetchRequest(for: postId)
         let entities = (try? contextProvider.viewContext.fetch(request)) ?? []
-        return entities.map {
-            FavoriteAction(
-                postId: $0.postId ?? "",
-                timestamp: $0.timestamp ?? Date(),
-                liked: $0.liked)
+        
+        return entities.map { entity in
+            PendingLikeAction(
+                postId: entity.postId ?? "",
+                timestamp: entity.timestamp ?? Date(),
+                isLiked: entity.liked
+            )
         }
     }
     
-    func clearPendingActions() {
+    func clearAllPendingActions() {
         contextProvider.performOnBackground { [weak self] context in
-            self?.clearAllPendingActions(context: context)
+            self?.removeAllPendingActions(in: context)
         }
     }
     
-    func deletePendingAction(for postId: String) {
+    func removePendingAction(for postId: String) {
         contextProvider.performOnBackground { [weak self] context in
-            self?.deletePendingAction(postId: postId, context: context)
+            self?.removePendingAction(postId: postId, in: context)
         }
     }
     
     // MARK: - Private Methods
     
-    private func processPendingAction(postId: String, liked: Bool, context: NSManagedObjectContext) {
+    private func processLikeAction(postId: String, isLiked: Bool, context: NSManagedObjectContext) {
         let fetchRequest = PendingLikeEntity.fetchRequest(for: postId)
         
         do {
             let existingActions = try context.fetch(fetchRequest)
             
             if let existingAction = existingActions.first {
-                if existingAction.liked == liked {
+                if existingAction.liked == isLiked {
                     return
-                } else {
+                }
+                else {
                     context.delete(existingAction)
                     try context.save()
                     return
@@ -67,16 +74,17 @@ final class FavoriteManager: FavoriteManaging {
             let newAction = PendingLikeEntity(context: context)
             newAction.postId = postId
             newAction.timestamp = Date()
-            newAction.liked = liked
+            newAction.liked = isLiked
             
             try context.save()
             
         } catch {
-            print("Error processing pending action: \(error)")
+            print("Ошибка обработки действия лайка для поста \(postId): \(error)")
         }
     }
     
-    private func clearAllPendingActions(context: NSManagedObjectContext) {
+    /// Удаляет все отложенные действия из базы данных
+    private func removeAllPendingActions(in context: NSManagedObjectContext) {
         let fetchRequest = PendingLikeEntity.fetchAllRequest()
         
         do {
@@ -84,11 +92,12 @@ final class FavoriteManager: FavoriteManaging {
             actions.forEach { context.delete($0) }
             try context.save()
         } catch {
-            print("Error clearing pending actions: \(error)")
+            print("Ошибка удаления всех отложенных действий: \(error)")
         }
     }
     
-    private func deletePendingAction(postId: String, context: NSManagedObjectContext) {
+    /// Удаляет отложенное действие для конкретного поста
+    private func removePendingAction(postId: String, in context: NSManagedObjectContext) {
         let fetchRequest = PendingLikeEntity.fetchRequest(for: postId)
         
         do {
@@ -96,7 +105,7 @@ final class FavoriteManager: FavoriteManaging {
             actions.forEach { context.delete($0) }
             try context.save()
         } catch {
-            print("Error deleting pending action: \(error)")
+            print("Ошибка удаления отложенного действия для поста \(postId): \(error)")
         }
     }
 }
@@ -105,13 +114,15 @@ final class FavoriteManager: FavoriteManaging {
 
 extension PendingLikeEntity {
     
+    /// Создает fetch request для конкретного поста
     static func fetchRequest(for postId: String) -> NSFetchRequest<PendingLikeEntity> {
         let request = PendingLikeEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "postId == %@", postId)
+        request.predicate = NSPredicate(format: "%K == %@", #keyPath(PendingLikeEntity.postId), postId)
         request.fetchLimit = 1
         return request
     }
     
+    /// Создает fetch request для всех отложенных действий
     static func fetchAllRequest() -> NSFetchRequest<PendingLikeEntity> {
         let request = PendingLikeEntity.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: #keyPath(PendingLikeEntity.timestamp), ascending: true)]

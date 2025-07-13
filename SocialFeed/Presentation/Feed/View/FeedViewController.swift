@@ -35,7 +35,7 @@ final class FeedViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Рекомендации"
+        title = "Social Feed"
         setupTableView()
         setupDataSource()
         setupBindings()
@@ -64,6 +64,9 @@ final class FeedViewController: UIViewController {
             }
             postCell.onLikeTap = {
                 self?.viewModel.likeTappedOnPost(at: indexPath)
+            }
+            postCell.onStoreTap = {
+                self?.viewModel.storeTappedOnPost(at: indexPath)
             }
             return postCell
         })
@@ -103,6 +106,10 @@ extension FeedViewController: UITableViewDelegate {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // Анимация segment control
+        feedView.handleScrollViewDidScroll(scrollView)
+        
+        // Пагинация
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let height = scrollView.frame.size.height

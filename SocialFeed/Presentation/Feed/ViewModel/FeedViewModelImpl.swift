@@ -8,6 +8,7 @@ final class FeedViewModelImpl {
     private let stateSubject = CurrentValueSubject<FeedViewState, Never>(FeedViewState())
     private let fetchPostsUseCase: FetchPostsUseCase
     private let likePostUseCase: LikePostUseCase
+    private let storePostUseCase: StorePostUseCase
     
     private var currentState: FeedViewState {
         stateSubject.value
@@ -15,9 +16,13 @@ final class FeedViewModelImpl {
     
     // MARK: - Lifecycle
     
-    init(fetchPostsUseCase: FetchPostsUseCase, likePostUseCase: LikePostUseCase) {
+    init(fetchPostsUseCase: FetchPostsUseCase,
+         likePostUseCase: LikePostUseCase,
+         storePostUseCase: StorePostUseCase
+    ) {
         self.fetchPostsUseCase = fetchPostsUseCase
         self.likePostUseCase = likePostUseCase
+        self.storePostUseCase = storePostUseCase
     }
     
     // MARK: - Private Methods
@@ -72,15 +77,17 @@ extension FeedViewModelImpl: FeedViewModel {
     }
     
     func loadNextPageIfNeeded() {
-        loadPosts()
+        if AppConfiguration.environment != .mock {
+            loadPosts()
+        }
     }
     
     func likeTappedOnPost(at indexPath: IndexPath) {
         let post = currentState.posts[indexPath.row]
-        likePostUseCase.execute(postId: post.postId, isLiked: !post.isLiked)
+        likePostUseCase.execute(postId: post.id, isLiked: !post.isLiked)
         
         updateState { state in
-            if let index = state.posts.firstIndex(where: { $0.postId == post.postId }) {
+            if let index = state.posts.firstIndex(where: { $0.id == post.id }) {
                 var builder = PostCellViewModelBuilder(postCellViewModel: state.posts[index])
                 builder.isLiked = !post.isLiked
                 let currentLikes = state.posts[index].totalLikes
@@ -95,7 +102,35 @@ extension FeedViewModelImpl: FeedViewModel {
         }
     }
     
-    func storeTappedOnPost(at indexPath: IndexPath) { }
+    func storeTappedOnPost(at indexPath: IndexPath) {
+        let postViewModel = currentState.posts[indexPath.row]
+        let post = Post(
+            id: postViewModel.id,
+            username: postViewModel.username,
+            avatar: postViewModel.avatarURL?.absoluteString ?? "",
+            title: postViewModel.title,
+            text: postViewModel.text,
+            image: postViewModel.postImageURL?.absoluteString ?? "",
+            created: postViewModel.created,
+            totalLikes: postViewModel.totalLikes,
+            isLiked: postViewModel.isLiked,
+            isStored: postViewModel.isStored
+        )
+        
+        storePostUseCase.execute(post: post) { error in
+            DispatchQueue.main.async {
+                print("Error storing: \(error)")
+            }
+        }
+        
+        updateState { state in
+            if let index = state.posts.firstIndex(where: { $0.id == post.id }) {
+                var builder = PostCellViewModelBuilder(postCellViewModel: state.posts[index])
+                builder.isStored = !post.isStored
+                state.posts[index] = builder.build()
+            }
+        }
+    }
     
     func postExpanded(at indexPath: IndexPath) {
         guard indexPath.row < currentState.posts.count else { return }

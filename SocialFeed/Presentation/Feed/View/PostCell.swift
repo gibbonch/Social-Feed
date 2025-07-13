@@ -138,7 +138,7 @@ final class PostCell: UITableViewCell {
         
         authorView.setUsername(viewModel.username)
         headerLabel.text = viewModel.title
-        createdLabel.text = viewModel.created
+        createdLabel.text = viewModel.created.formatDate
         originalText = viewModel.text
         isExpanded = viewModel.isExpanded
         isLiked = viewModel.isLiked

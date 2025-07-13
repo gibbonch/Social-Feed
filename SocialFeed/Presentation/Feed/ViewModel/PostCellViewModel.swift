@@ -2,14 +2,13 @@ import Foundation
 
 /// UI-модель ячейки поста.
 struct PostCellViewModel {
-    let id: UUID
-    let postId: String
+    let id: String
     let avatarURL: URL?
     let username: String
     let postImageURL: URL?
     let title: String
     let text: String
-    let created: String
+    let created: Date
     let totalLikes: Int
     let isLiked: Bool
     let isStored: Bool
@@ -22,7 +21,7 @@ extension PostCellViewModel: Hashable {
     }
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(postId)
+        hasher.combine(id)
     }
 }
 
@@ -32,19 +31,17 @@ struct PostCellViewModelBuilder {
     var isStored: Bool
     var isExpanded: Bool
     var totalLikes: Int
-    private let id: UUID
-    private let postId: String
+    private let id: String
     private let avatarURL: URL?
     private let username: String
     private let postImageURL: URL?
     private let title: String
     private let text: String
-    private let created: String
+    private let created: Date
 
     /// Инициализатор из UI-модели.
     init(postCellViewModel: PostCellViewModel) {
         self.id = postCellViewModel.id
-        self.postId = postCellViewModel.postId
         self.avatarURL = postCellViewModel.avatarURL
         self.username = postCellViewModel.username
         self.postImageURL = postCellViewModel.postImageURL
@@ -59,8 +56,7 @@ struct PostCellViewModelBuilder {
 
     /// Инициализатор из бизнес-модели Post.
     init(post: Post) {
-        self.id = UUID()
-        self.postId = post.id
+        self.id = post.id
         self.avatarURL = URL(string: post.avatar ?? "")
         self.username = post.username
         self.postImageURL = URL(string: post.image)
@@ -76,7 +72,6 @@ struct PostCellViewModelBuilder {
     func build() -> PostCellViewModel {
         return PostCellViewModel(
             id: id,
-            postId: postId,
             avatarURL: avatarURL,
             username: username,
             postImageURL: postImageURL,

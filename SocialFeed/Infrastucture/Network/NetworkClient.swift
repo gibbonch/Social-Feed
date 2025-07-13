@@ -27,16 +27,12 @@ final class NetworkClient {
     /// Экземпляр Alamofire `Session`.
     private let session: Session
     
-    /// Текущее сетевое окружение (`production`, `development`, `mock`).
-    private let environment: Environment
-    
     /// Инициализирует сетевой клиент с заданным окружением и конфигурацией сессии.
     ///
     /// - Parameters:
-    ///   - environment: Окружение API (по умолчанию — `.development`).
+    ///   - environment: Окружение API (по умолчанию - `.development`).
     ///   - configuration: Конфигурация `URLSession` для Alamofire.
-    init(environment: Environment = .development, configuration: URLSessionConfiguration) {
-        self.environment = environment
+    init(configuration: URLSessionConfiguration) {
         self.session = Session(configuration: configuration)
     }
 }
@@ -50,7 +46,7 @@ extension NetworkClient: NetworkClientProtocol {
     ) where T : Decodable {
         
         // Если выбрано mock-окружение — возвращается заранее определённый ответ.
-        if environment == .mock {
+        if AppConfiguration.environment == .mock {
             let mockResponse = MockResponseManager.shared.mockResponse(for: endpoint, type: responseType)
             // Симмуляция сетевого запроса
             DispatchQueue.global(qos: .utility).async {
@@ -60,7 +56,7 @@ extension NetworkClient: NetworkClientProtocol {
             return
         }
         
-        let fullURL = environment.baseURL + endpoint.path
+        let fullURL = AppConfiguration.environment.baseURL + endpoint.path
         
         session.request(
             fullURL,

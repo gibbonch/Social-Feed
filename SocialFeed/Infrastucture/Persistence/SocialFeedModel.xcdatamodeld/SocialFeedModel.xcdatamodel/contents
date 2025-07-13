@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23788.4" systemVersion="24F74" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="PendingLikeEntity" representedClassName="PendingLikeEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="liked" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="postId" attributeType="String"/>
+        <attribute name="timestamp" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
+    <entity name="PostEntity" representedClassName="PostEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="avatar" optional="YES" attributeType="String"/>
+        <attribute name="created" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="image" attributeType="String"/>
+        <attribute name="isLiked" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="postId" attributeType="String"/>
+        <attribute name="text" attributeType="String"/>
+        <attribute name="title" attributeType="String"/>
+        <attribute name="totalLikes" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="username" attributeType="String"/>
+    </entity>
+</model>
